@@ -5,19 +5,24 @@ import { User } from './auth.entity';
 import { Repository } from 'typeorm';
 import { ResponseSuccess } from 'src/interface';
 import { LoginDto, RegisterDto } from './auth.dto';
-import { compare, hash } from 'bcrypt'; //import hash
-
+import { compare, hash } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt'; //import hash
+import { jwt_config } from 'src/config/jwt.config';
 @Injectable()
 export class AuthService extends BaseResponse {
   constructor(
     @InjectRepository(User) private readonly authRepository: Repository<User>,
-    private jwtService : JwtService, // panggil kelas jwt service
+    private jwtService: JwtService, // panggil kelas jwt service
   ) {
     super();
   }
-  generateJWT(payload: jwtPayload, expiresIn: string | number, token: string) {
+  generateJWT(
+    payload: jwtPayload,
+    expiresIn: string | number,
+    secret_key: string,
+  ) {
     return this.jwtService.sign(payload, {
-      secret: token,
+      secret: secret_key,
       expiresIn: expiresIn,
     });
   } //membuat method untuk generate jwt
@@ -32,12 +37,10 @@ export class AuthService extends BaseResponse {
       throw new HttpException('User already registered', HttpStatus.FOUND);
     }
 
-    console.log('payload sebelum hash', payload);
     payload.password = await hash(payload.password, 12); //hash password
-    console.log('payload sebelum hash', payload);
-    const result = await this.authRepository.save(payload);
+    await this.authRepository.save(payload);
 
-    return this._success('Register Berhasil', result);
+    return this._success('Register Berhasil');
   }
 
   async login(payload: LoginDto): Promise<ResponseSuccess> {
@@ -64,14 +67,49 @@ export class AuthService extends BaseResponse {
     const checkPassword = await compare(
       payload.password,
       checkUserExists.password,
-    ); // compare password yang dikirim dengan password yang ada di tabel
+    );
+
     if (checkPassword) {
-      return this._success('Login Success', checkUserExists);
+      const jwtPayload: jwtPayload = {
+        id: checkUserExists.id,
+        nama: checkUserExists.nama,
+        email: checkUserExists.email,
+      };
+
+      const access_token = await this.generateJWT(
+        jwtPayload,
+        '1d',
+        jwt_config.access_token_secret,
+      );
+      const refresh_token = await this.generateJWT(
+        jwtPayload,
+        '7d',
+        jwt_config.refresh_token_secret,
+      );
+      await this.authRepository.save({
+        refresh_token: refresh_token,
+        id: checkUserExists.id,
+      }); // simpan refresh token ke dalam tabel
+      return this._success('Login Success', {
+        ...checkUserExists,
+        access_token: access_token,
+        refresh_token: refresh_token,
+      });
     } else {
       throw new HttpException(
         'email dan password tidak sama',
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
+  }
+
+  async myProfile(id: number): Promise<ResponseSuccess> {
+    const user = await this.authRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    return this._success('OK', user);
   }
 }

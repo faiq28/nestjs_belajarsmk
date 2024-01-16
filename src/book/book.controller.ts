@@ -9,7 +9,12 @@ import {
   // Query,
 } from '@nestjs/common';
 import { BookService } from './book.service';
-import { CreateBookDto, FindBookDto, createBookArrayDto } from './book.dto';
+import {
+  CreateBookDto,
+  deleteBookArrayDto,
+  FindBookDto,
+  createBookArrayDto,
+} from './book.dto';
 import { UpdateBookDto } from './book.dto';
 import { Pagination } from 'src/utils/decorator/pagination.decorator';
 
@@ -47,6 +52,9 @@ export class BookController {
     console.log('pay', payload);
     return this.bookService.bulkCreate(payload);
   }
-  // @Delete('delete/multi')
-  // this.deleteBook(@Param('multi') id: string)
+
+  @Post('delete/bulk')
+  deleteBulkBook(@Body() payload: deleteBookArrayDto) {
+    return this.bookService.bulkDelete(payload);
+  }
 }

@@ -10,6 +10,7 @@ import {
   Max,
   ValidateNested,
   IsOptional,
+  ArrayNotEmpty,
 } from 'class-validator';
 import { PageRequestDto } from 'src/utils/dto/page.dto';
 
@@ -38,13 +39,18 @@ export class UpdateBookDto extends PickType(BookDto, [
   'year',
 ]) {}
 //OmitType untuk item yang dikecualikan
-//PickType untuk item yang akan diambil
-
+//PickType untuk item yang akan diambilx
 export class createBookArrayDto {
   @IsArray()
   @ValidateNested()
   @Type(() => CreateBookDto)
   data: CreateBookDto[];
+}
+
+export class deleteBookArrayDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  data: [];
 }
 
 export class FindBookDto extends PageRequestDto {

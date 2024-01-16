@@ -8,16 +8,19 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { MobilModule } from './mobil/mobil.module';
 import { AuthModule } from './app/auth/auth.module';
 import { MailModule } from './app/mail/mail.module';
+import { ProdukModule } from './produk/produk.module';
+import { ConfigModule } from '@nestjs/config';
+import { KategoriModule } from './app/kategori/kategori.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // konfigurasi is global untuk semua module
+    }),
     TypeOrmModule.forRoot(typeOrmConfig),
-    LatihanModule,
-    BookModule,
-    MobilModule,
     AuthModule,
     MailModule,
-    AuthModule,
+    KategoriModule,
   ],
   controllers: [AppController],
   providers: [AppService],

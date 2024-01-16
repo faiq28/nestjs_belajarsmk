@@ -6,20 +6,24 @@ import { User } from './auth.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAccessTokenStrategy } from './jwtAccessToken.strategy';
 import { MailModule } from '../mail/mail.module';
-// import { ResetPassword } from './reset_password.entity';
 import { JwtRefreshTokenStrategy } from './jwtRefreshToken.strategy';
+import { ResetPassword } from '../mail/reset_password.entity';
+import { PassportModule } from '@nestjs/passport';
+import { jwt_config } from 'src/config/jwt.config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      User,
-      // ResetPassword
-    ]),
+    TypeOrmModule.forFeature([User, ResetPassword]),
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+      property: 'user',
+      session: false,
+    }),
     JwtModule.register({
-      // global: true,
-      // signOptions: {
-      //   algoritma: 'HS256',
-      // },
+      // secret: jwt_config.secret,
+      signOptions: {
+        expiresIn: jwt_config.expired,
+      },
     }),
     MailModule,
   ],

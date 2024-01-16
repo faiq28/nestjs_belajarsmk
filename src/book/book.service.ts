@@ -5,7 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ResponsePagination, ResponseSuccess } from 'src/interface';
-import { CreateBookDto, FindBookDto, createBookArrayDto } from './book.dto';
+import {
+  CreateBookDto,
+  FindBookDto,
+  createBookArrayDto,
+  deleteBookArrayDto,
+} from './book.dto';
 import { InjectRepository } from '@nestjs/typeorm'; // import injectReposity
 import { Book } from './book.entity'; // import Book Entiy
 import { Between, Like, Repository } from 'typeorm'; //import repository
@@ -173,41 +178,31 @@ export class BookService extends BaseResponse {
     }
   }
 
-  async bulkDelete(ids: number[]): Promise<ResponseSuccess> {
+  async bulkDelete(payload: deleteBookArrayDto): Promise<ResponseSuccess> {
     try {
-      console.log('IDs to delete', ids);
-      let berhasil = 0;
-      let gagal = 0;
-
+      let success = 0;
+      let fail = 0;
       await Promise.all(
-        ids.map(async (id) => {
+        payload.data.map(async (item) => {
+          const checks = await this.bookRepository.delete(item);
           try {
-            const bookToDelete = await this.bookRepository.findOne({
-              where: {
-                id,
-              },
-            });
-
-            if (!bookToDelete) {
-              throw new NotFoundException(
-                `Buku dengan ID ${id} tidak ditemukan.`,
-              );
+            if (checks.affected === 0) {
+              fail = fail + 1;
+            } else {
+              success = success + 1;
             }
-
-            await this.bookRepository.remove(bookToDelete);
-            berhasil = berhasil + 1;
-          } catch {
-            gagal = gagal + 1;
+          } catch (error) {
+            fail = fail + 1;
           }
         }),
       );
-
       return {
-        status: 'ok',
-        message: `Berhasil menghapus buku sebanyak ${berhasil} dan gagal sebanyak ${gagal}`,
+        status: 'Ok',
+        message: 'Books succesfuly added sebanyak ${success} dan gagal ${fail}',
+        data: payload,
       };
     } catch (error) {
-      throw new HttpException('Ada Kesalahan', HttpStatus.BAD_REQUEST);
+      throw new HttpException('ada kesalahan', HttpStatus.BAD_REQUEST);
     }
   }
   // updateBook(

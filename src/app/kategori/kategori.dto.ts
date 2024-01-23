@@ -1,6 +1,7 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { IsInt, IsObject, IsOptional, IsString } from 'class-validator';
 import { PageRequestDto } from 'src/utils/dto/page.dto';
+// import { User } from '../auth/auth.entity';
 
 export class KategoriDto {
   @IsInt()
@@ -21,15 +22,8 @@ export class KategoriDto {
 export class CreateKategoriDto extends OmitType(KategoriDto, [
   'id',
   'updated_by',
-]) {} // ketika create kecualikan id , dan updated_by
-
+]) {}
 export class UpdateKategoriDto extends OmitType(KategoriDto, ['created_by']) {}
-
-export class FindOneKategoriDto {
-  @IsInt()
-  id: number;
-}
-
 export class findAllKategori extends PageRequestDto {
   @IsString()
   @IsOptional()

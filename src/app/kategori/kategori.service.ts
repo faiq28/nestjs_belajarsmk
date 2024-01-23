@@ -1,26 +1,35 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import BaseResponse from 'src/utils/response/base.response';
-import { Kategori } from './kategori.entity';
-import { CreateKategoriDto, findAllKategori } from './kategori.dto';
-import { ResponsePagination } from 'src/interface';
-import { ResponseSuccess } from 'src/interface';
 import { Like, Repository } from 'typeorm';
-import { REQUEST } from '@nestjs/core';
+import { Kategori } from './kategori.entity';
+import {
+  CreateKategoriDto,
+  UpdateKategoriDto,
+  findAllKategori,
+} from './kategori.dto';
+import { ResponsePagination, ResponseSuccess } from 'src/interface';
 
 @Injectable()
 export class KategoriService extends BaseResponse {
   constructor(
     @InjectRepository(Kategori)
     private readonly kategoriRepository: Repository<Kategori>,
-    @Inject(REQUEST) private req: any, // inject request agar bisa mengakses req.user.id dari  JWT token pada service
+    @Inject(REQUEST) private req: any,
   ) {
     super();
   }
 
   async create(payload: CreateKategoriDto): Promise<ResponseSuccess> {
     try {
-      await this.kategoriRepository.save(payload); // cukup payload tanpa manipulasi object
+      await this.kategoriRepository.save(payload);
 
       return this._success('OK', this.req.user.user_id);
     } catch {
@@ -28,10 +37,68 @@ export class KategoriService extends BaseResponse {
     }
   }
 
+  async update(
+    id: number,
+    payload: UpdateKategoriDto,
+  ): Promise<ResponseSuccess> {
+    const kat = await this.kategoriRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (kat === null) {
+      throw new NotFoundException(`kategori dengan id ${id} tidak di temukan`);
+    }
+
+    try {
+      await this.kategoriRepository.save({ ...payload, id: id });
+      return this._success('OK', this.req.user.user_id);
+    } catch {
+      throw new HttpException('Ada Kesalahan', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+  }
+
+  async getDetail(id: number): Promise<ResponseSuccess> {
+    const kat = await this.kategoriRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (kat === null) {
+      throw new NotFoundException(`kategori dengan id ${id} tidak di temukan`);
+    }
+
+    return {
+      status: 'ok',
+      message: 'berhasil',
+      data: kat,
+    };
+  }
+
+  async delete(id: number): Promise<ResponseSuccess> {
+    const delet = await this.kategoriRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (delet === null) {
+      throw new NotFoundException(`pembelian dengan id ${id} tidak di temukan`);
+    }
+    const hapus = await this.kategoriRepository.delete(id);
+    return {
+      status: 'ok',
+      message: 'Berhasil Menghapus kategori',
+      data: hapus,
+    };
+  }
+
   async getAllCategory(query: findAllKategori): Promise<ResponsePagination> {
     const { page, pageSize, limit, nama_kategori } = query;
 
-    const filterQuery: any = {};
+    const filterQuery = {};
     if (nama_kategori) {
       filterQuery.nama_kategori = Like(`%${nama_kategori}%`);
     }
@@ -60,38 +127,4 @@ export class KategoriService extends BaseResponse {
 
     return this._pagination('OK', result, total, page, pageSize);
   }
-
-  // async getKategoriById(id: number): Promise<ResponseSuccess> {
-  //   try {
-  //     const kategori = await this.kategoriRepository.findOne(id, {
-  //       relations: ['created_by', 'updated_by'],
-  //       select: {
-  //         id: true,
-  //         nama_kategori: true,
-  //         created_by: {
-  //           id: true,
-  //           nama: true,
-  //         },
-  //         updated_by: {
-  //           id: true,
-  //           nama: true,
-  //         },
-  //       },
-  //     });
-
-  //     if (!kategori) {
-  //       throw new HttpException(
-  //         'Kategori tidak ditemukan',
-  //         HttpStatus.NOT_FOUND,
-  //       );
-  //     }
-
-  //     return this._success('OK', kategori);
-  //   } catch {
-  //     throw new HttpException(
-  //       'Ada Kesalahan',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
 }

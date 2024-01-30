@@ -8,16 +8,24 @@ import {
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import BaseResponse from 'src/utils/response/base.response';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Kategori } from './kategori.entity';
-import { CreateKategoriDto, UpdateKategoriDto } from './kategori.dto';
-import { ResponseSuccess } from 'src/interface';
+import {
+  CreateKategoriDto,
+  UpdateKategoriDto,
+  createKategoriArrayDto,
+  findAllKategori,
+} from './kategori.dto';
+import { ResponsePagination, ResponseSuccess } from 'src/interface';
+import { User } from '../auth/auth.entity';
 
 @Injectable()
 export class KategoriService extends BaseResponse {
   constructor(
     @InjectRepository(Kategori)
     private readonly kategoriRepository: Repository<Kategori>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @Inject(REQUEST) private req: any,
   ) {
     super();
@@ -89,5 +97,73 @@ export class KategoriService extends BaseResponse {
       message: 'Berhasil Menghapus kategori',
       data: hapus,
     };
+  }
+
+  async getAllCategory(query: findAllKategori): Promise<ResponsePagination> {
+    const { page, pageSize, limit, nama_kategori, nama_user } = query;
+    console.log('query', query);
+    const total = await this.kategoriRepository.count();
+    const filterQuery: any = {};
+    if (nama_kategori) {
+      filterQuery.nama_kategori = Like(`%${nama_kategori}%`);
+    }
+
+    if (nama_user) {
+      filterQuery.created_by = {
+        nama: Like(`%${nama_user}%`),
+      };
+    }
+    const result = await this.kategoriRepository.find({
+      relations: ['created_by', 'updated_by'],
+      select: {
+        id: true,
+        nama_kategori: true,
+        created_by: {
+          id: true,
+          nama: true,
+        },
+        updated_by: {
+          id: true,
+          nama: true,
+        },
+      },
+      skip: limit,
+      take: pageSize,
+    });
+
+    return this._pagination('oke', result, total, page, pageSize);
+  }
+
+  async bulkCreate(payload: createKategoriArrayDto): Promise<ResponseSuccess> {
+    try {
+      await Promise.all(
+        payload.data.map(async (item) => {
+          await this.kategoriRepository.save(item);
+        }),
+      );
+
+      return this._success('oke');
+    } catch {
+      throw new HttpException('Ada Kesalahan', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async getUserCategory(): Promise<ResponseSuccess> {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: this.req.user.id,
+      },
+      relations: ['kategori_created_by', 'kategori_updated_by'],
+
+      select: {
+        id: true,
+        nama: true,
+        kategori_create_by: {
+          id: true,
+          nama_kategori: true,
+        },
+      },
+    });
+    return this._success('ok', user);
   }
 }

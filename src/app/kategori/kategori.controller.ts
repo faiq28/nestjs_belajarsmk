@@ -8,12 +8,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { KategoriService } from './kategori.service';
-import { CreateKategoriDto, UpdateKategoriDto } from './kategori.dto';
+import {
+  CreateKategoriDto,
+  UpdateKategoriDto,
+  findAllKategori,
+} from './kategori.dto';
 import { JwtGuard } from '../auth/auth.guard';
-// import { InjectCreatedBy } from 'src/utils/decorator/utils/decorator/inject-created_by.decorator';
-// import { InjectUpdatedBy } from 'src/utils/decorator/inject-update_by.decorator';
 import { InjectCreatedBy } from 'src/utils/decorator/inject-created_by.decorator';
 import { InjectUpdatedBy } from 'src/utils/decorator/serahluaja';
+import { Pagination } from 'src/utils/decorator/pagination.decorator';
 @UseGuards(JwtGuard)
 @Controller('kategori')
 export class KategoriController {
@@ -39,5 +42,15 @@ export class KategoriController {
   @Delete('delete/:id')
   deleteBook(@Param('id') id: string) {
     return this.kategoriService.delete(+id);
+  }
+
+  @Get('list')
+  async getAllCategory(@Pagination() query: findAllKategori) {
+    return this.kategoriService.getAllCategory(query);
+  }
+
+  @Get('user/list')
+  async getUserCategory() {
+    return this.kategoriService.getUserCategory();
   }
 }

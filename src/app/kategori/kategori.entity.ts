@@ -17,11 +17,11 @@ export class Kategori extends BaseEntity {
   nama_kategori: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'created_by' }) //buat relasi many to one  dengan table user
+  @JoinColumn({ name: 'created_by' })
   created_by: User;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'updated_by' }) //buat relasi many to one  dengan table user
+  @JoinColumn({ name: 'updated_by' })
   updated_by: User;
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })

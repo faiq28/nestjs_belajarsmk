@@ -11,12 +11,14 @@ import { KategoriService } from './kategori.service';
 import {
   CreateKategoriDto,
   UpdateKategoriDto,
+  createKategoriArrayDto,
   findAllKategori,
 } from './kategori.dto';
 import { JwtGuard } from '../auth/auth.guard';
 import { InjectCreatedBy } from 'src/utils/decorator/inject-created_by.decorator';
-import { InjectUpdatedBy } from 'src/utils/decorator/serahluaja';
+import { InjectUpdatedBy } from 'src/utils/decorator/updatedby';
 import { Pagination } from 'src/utils/decorator/pagination.decorator';
+import { InjectBulkCreatedBy } from 'src/utils/decorator/bulkcreatedby';
 @UseGuards(JwtGuard)
 @Controller('kategori')
 export class KategoriController {
@@ -52,5 +54,10 @@ export class KategoriController {
   @Get('user/list')
   async getUserCategory() {
     return this.kategoriService.getUserCategory();
+  }
+
+  @Post('create/bulk')
+  createbulk(@InjectBulkCreatedBy() payload: createKategoriArrayDto) {
+    return this.kategoriService.bulkCreate(payload);
   }
 }

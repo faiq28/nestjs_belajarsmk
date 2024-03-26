@@ -6,10 +6,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BaseResponse from 'src/utils/response/base.response';
-import { User } from './auth.entity';
+import { User, UserGoogle } from './auth.entity';
 import { Repository } from 'typeorm';
 import { ResponseSuccess } from 'src/interface';
-import { LoginDto, RegisterDto, ResetPasswordDto } from './auth.dto';
+import {
+  LoginDto,
+  LoginWIthGoogleDTO,
+  RegisterDto,
+  ResetPasswordDto,
+} from './auth.dto';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt'; //import hash
 import { jwt_config } from 'src/config/jwt.config';
@@ -20,10 +25,12 @@ import { randomBytes } from 'crypto';
 export class AuthService extends BaseResponse {
   constructor(
     @InjectRepository(User) private readonly authRepository: Repository<User>,
+    @InjectRepository(UserGoogle)
+    private readonly userGoogleRepo: Repository<UserGoogle>,
     @InjectRepository(ResetPassword)
-    private readonly resetPasswordRepository: Repository<ResetPassword>, // inject repository reset password
+    private readonly resetPasswordRepository: Repository<ResetPassword>,
     private jwtService: JwtService,
-    private mailService: MailService, // panggil kelas jwt service
+    private mailService: MailService,
   ) {
     super();
   }
@@ -94,7 +101,7 @@ export class AuthService extends BaseResponse {
       );
       const refresh_token = await this.generateJWT(
         jwtPayload,
-        '7d',
+        '1d',
         jwt_config.refresh_token_secret,
       );
       await this.authRepository.save({
@@ -105,6 +112,7 @@ export class AuthService extends BaseResponse {
         ...checkUserExists,
         access_token: access_token,
         refresh_token: refresh_token,
+        role: 'siswa',
       });
     } else {
       throw new HttpException(
@@ -112,6 +120,83 @@ export class AuthService extends BaseResponse {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
+  }
+
+  async loginWithGoogle(payload: LoginWIthGoogleDTO) {
+    console.log(payload);
+
+    try {
+      const resDecode: any = this.jwtService.decode(payload.id_token);
+
+      if (resDecode.email == payload.email) {
+        const checkUserExists = await this.userGoogleRepo.findOne({
+          where: {
+            email: payload.email,
+          },
+          select: {
+            id: true,
+            nama: true,
+            email: true,
+            refresh_token: true,
+          },
+        });
+
+        if (checkUserExists == null) {
+          const jwtPayload: jwtPayload = {
+            id: payload.id,
+            nama: payload.nama,
+            email: payload.email,
+          };
+
+          const refresh_token = await this.generateJWT(
+            jwtPayload,
+            '7d',
+            jwt_config.refresh_token_secret,
+          );
+
+          await this.userGoogleRepo.save({
+            ...payload,
+            refresh_token,
+            id: payload.id,
+          });
+        }
+      }
+    } catch (error) {
+      console.log('err', error);
+      throw new HttpException('Ada Kesalahan', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async getDataloginGoogle(id: string) {
+    const checkUserExists = await this.userGoogleRepo.findOne({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        refresh_token: true,
+      },
+    });
+
+    const jwtPayload: jwtPayload = {
+      id: checkUserExists.id,
+      nama: checkUserExists.nama,
+      email: checkUserExists.email,
+    };
+
+    const access_token = await this.generateJWT(
+      jwtPayload,
+      '1d',
+      jwt_config.access_token_secret,
+    );
+
+    return this._success('Login Success', {
+      ...checkUserExists,
+      access_token: access_token,
+      role: 'siswa',
+    });
   }
 
   async myProfile(id: number): Promise<ResponseSuccess> {
@@ -158,7 +243,7 @@ export class AuthService extends BaseResponse {
 
     const refresh_token = await this.generateJWT(
       jwtPayload,
-      '7d',
+      '1d',
       jwt_config.refresh_token_secret,
     );
 
@@ -188,7 +273,7 @@ export class AuthService extends BaseResponse {
       );
     }
     const token = randomBytes(32).toString('hex'); // membuat token
-    const link = `http://localhost:5002/auth/reset-password/${user.id}/${token}`; //membuat link untuk reset password
+    const link = `http://localhost:3091/auth/reset-password/${user.id}/${token}`; //membuat link untuk reset password
     await this.mailService.sendForgotPassword({
       email: email,
       name: user.nama,

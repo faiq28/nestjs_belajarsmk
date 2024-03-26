@@ -198,7 +198,7 @@ export class BookService extends BaseResponse {
       );
       return {
         status: 'Ok',
-        message: 'Books succesfuly added sebanyak ${success} dan gagal ${fail}',
+        message: `Books succesfuly delete sebanyak ${success} dan gagal ${fail}`,
         data: payload,
       };
     } catch (error) {

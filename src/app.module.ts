@@ -8,21 +8,36 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { MobilModule } from './mobil/mobil.module';
 import { AuthModule } from './app/auth/auth.module';
 import { MailModule } from './app/mail/mail.module';
-import { ProdukModule } from './produk/produk.module';
+// import { ProdukModule } from './produk/produk.module';
 import { ConfigModule } from '@nestjs/config';
 import { KategoriModule } from './app/kategori/kategori.module';
+import { ProdukModule } from './app/produk/produk.module';
+import { UploadController } from './app/upload/upload.controller';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { KonsumenModule } from './app/konsumen/konsumen.module';
+import { ProfileModule } from './app/profile/profile.module';
+import { Service } from './app/.service';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
+
     ConfigModule.forRoot({
-      isGlobal: true, // konfigurasi is global untuk semua module
+      isGlobal: true,
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
     AuthModule,
     MailModule,
     KategoriModule,
+    ProdukModule,
+    BookModule,
+    KonsumenModule,
+    ProfileModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, UploadController],
+  providers: [AppService, Service],
 })
 export class AppModule {}

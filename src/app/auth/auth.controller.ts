@@ -7,7 +7,12 @@ import {
   Req,
   Param,
 } from '@nestjs/common';
-import { LoginDto, RegisterDto, ResetPasswordDto } from './auth.dto';
+import {
+  LoginDto,
+  LoginWIthGoogleDTO,
+  RegisterDto,
+  ResetPasswordDto,
+} from './auth.dto';
 import { AuthService } from './auth.service';
 import { JwtGuard, JwtGuardRefreshToken } from './auth.guard';
 
@@ -22,6 +27,16 @@ export class AuthController {
   @Post('login')
   async login(@Body() payload: LoginDto) {
     return this.authService.login(payload);
+  }
+
+  @Post('logingoogle')
+  async loginwithgoogle(@Body() payload: LoginWIthGoogleDTO) {
+    return this.authService.loginWithGoogle(payload);
+  }
+
+  @Get('getgoogledata/:id')
+  async getData(@Param('id') id: string) {
+    return this.authService.getDataloginGoogle(id);
   }
 
   // @UseGuards(JwtGuard)

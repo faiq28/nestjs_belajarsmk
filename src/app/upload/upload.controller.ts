@@ -12,12 +12,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import multer, { diskStorage } from 'multer';
+import { diskStorage } from 'multer';
 import { ResponseSuccess } from 'src/interface';
 import BaseResponse from 'src/utils/response/base.response';
 import { JwtGuard } from '../auth/auth.guard';
 import * as fs from 'fs';
-import { IsMimeType, IsIn } from 'class-validator';
+// import { IsMimeType, IsIn } from 'class-validator';
 @UseGuards(JwtGuard)
 @Controller('upload')
 export class UploadController extends BaseResponse {

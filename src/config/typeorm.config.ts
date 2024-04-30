@@ -6,7 +6,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: 'root', // username default xampp root
   password: '', // password default xampp string kosong
   // database: 'belajar_nest_js',
-  database: 'belajar_project',
+  database: 'belajar_projectbe_kls2',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: true,
   logging: true,

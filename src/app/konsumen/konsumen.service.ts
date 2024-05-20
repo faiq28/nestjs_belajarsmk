@@ -6,7 +6,7 @@ import { Like, Repository } from 'typeorm';
 import {
   ResponsePagination,
   ResponseSuccess,
-} from 'src/interface/response.interface';
+} from 'src/interface/response';
 import { CreateKonsumenDto, findAllKonsumenDto } from './konsumen.dto';
 
 @Injectable()

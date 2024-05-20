@@ -45,6 +45,21 @@ export class AuthService extends BaseResponse {
     });
   } //membuat method untuk generate jwt
 
+  // async register(payload: RegisterDto): Promise<ResponseSuccess> {
+  //   const checkUserExists = await this.authRepository.findOne({
+  //     where: {
+  //       email: payload.email,
+  //     },
+  //   });
+  //   if (checkUserExists) {
+  //     throw new HttpException('User already registered', HttpStatus.FOUND);
+  //   }
+
+  //   payload.password = await hash(payload.password, 12); //hash password
+  //   await this.authRepository.save(payload);
+
+  //   return this._success('Register Berhasil');
+  // }
   async register(payload: RegisterDto): Promise<ResponseSuccess> {
     const checkUserExists = await this.authRepository.findOne({
       where: {

@@ -66,9 +66,10 @@ export class ProdukService extends BaseResponse {
       where: {
         id: id,
       },
+      relations: ['kategori'],
     });
     if (detail === null) {
-      throw new NotFoundException(`produk dengna id ${id} tidak ditemukan`);
+      throw new NotFoundException(`produk dengan id ${id} tidak ditemukan`);
     }
     return {
       status: 'ok',

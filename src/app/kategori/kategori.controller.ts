@@ -16,7 +16,7 @@ import {
 } from './kategori.dto';
 import { JwtGuard } from '../auth/auth.guard';
 import { InjectCreatedBy } from 'src/utils/decorator/inject-created_by.decorator';
-import { InjectUpdatedBy } from 'src/utils/decorator/updatedby';
+import { InjectUpdatedBy } from 'src/utils/decorator/inject-updated_by.decorator';
 import { Pagination } from 'src/utils/decorator/pagination.decorator';
 import { InjectBulkCreatedBy } from 'src/utils/decorator/bulkcreatedby';
 @UseGuards(JwtGuard)

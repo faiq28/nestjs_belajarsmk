@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LatihanModule } from './latihan/latihan.module';
+// import { LatihanModule } from './latihan/latihan.module';
 import { BookModule } from './book/book.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
-import { MobilModule } from './mobil/mobil.module';
+// import { MobilModule } from './mobil/mobil.module';
 import { AuthModule } from './app/auth/auth.module';
 import { MailModule } from './app/mail/mail.module';
 // import { ProdukModule } from './produk/produk.module';

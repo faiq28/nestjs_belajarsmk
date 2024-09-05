@@ -21,6 +21,8 @@ import { Service } from './app/.service';
 import { UniqueValidator } from './utils/validator/unique.validator';
 import { OrderModule } from './app/order/order.module';
 import { OrderDetailModule } from './app/order_detail/order_detail.module';
+import { QueryBuilderModule } from './query-builder/query-builder.module';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { OrderDetailModule } from './app/order_detail/order_detail.module';
     ProfileModule,
     OrderModule,
     OrderDetailModule,
+    QueryBuilderModule,
+    KafkaModule,
   ],
   controllers: [AppController, UploadController],
   providers: [AppService, Service, UniqueValidator],

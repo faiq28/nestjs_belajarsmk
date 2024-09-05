@@ -3,10 +3,7 @@ import BaseResponse from 'src/utils/response/base.response';
 import { Konsumen } from './konsumen.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
-import {
-  ResponsePagination,
-  ResponseSuccess,
-} from 'src/interface/response';
+import { ResponsePagination, ResponseSuccess } from 'src/interface/response';
 import { CreateKonsumenDto, findAllKonsumenDto } from './konsumen.dto';
 
 @Injectable()
